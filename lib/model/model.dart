@@ -248,7 +248,9 @@ class SampleModel extends Listenable {
   /// Contains the category, control, theme information.
   SampleModel() {
     isInitialRender = true;
-
+    isFirstTime = true;
+    // ignore: unnecessary_statements
+    assistApiKey;
     searchControlItems = <Control>[];
     sampleList = <SubItem>[];
     searchResults = <SubItem>[];
@@ -410,14 +412,23 @@ class SampleModel extends Listenable {
   /// Contains the light theme palette colors.
   final List<Color> paletteColors = <Color>[];
 
+  /// Contains the M3 light theme palette colors.
+  final List<Color> paletteColorsM3 = <Color>[];
+
   /// Contains the primary color.
   late Color primaryColor;
 
   /// Contains the pallete's border colors.
   final List<Color> paletteBorderColors = List.filled(4, Colors.transparent);
 
+  /// Contains the M3 pallete's border colors.
+  final List<Color> paletteBorderColorsM3 = List.filled(4, Colors.transparent);
+
   /// Contains dark theme theme palette colors.
   final List<Color> darkPaletteColors = <Color>[];
+
+  /// Contains the M3 dark theme palette colors.
+  final List<Color> darkPaletteColorsM3 = <Color>[];
 
   /// Holds current palette color.
   // Color currentPaletteColor = const Color.fromRGBO(0, 116, 227, 1);
@@ -501,6 +512,10 @@ class SampleModel extends Listenable {
 
   final Set<VoidCallback> _listeners = <VoidCallback>{};
 
+  late bool isFirstTime;
+
+  String assistApiKey = '';
+
   /// Switching between light, dark, system themes.
   void changeTheme(ThemeData currentThemeData, bool isMaterial3) {
     themeData = currentThemeData;
@@ -510,9 +525,11 @@ class SampleModel extends Listenable {
       _updateMaterial2Colors(currentThemeData);
     }
 
-    hoverColor = currentThemeData.colorScheme.onSurface.withOpacity(0.08);
-    focusedColor = currentThemeData.colorScheme.onSurface.withOpacity(0.12);
-    splashColor = currentThemeData.colorScheme.onSurface.withOpacity(0.15);
+    hoverColor = currentThemeData.colorScheme.onSurface.withValues(alpha: 0.08);
+    focusedColor =
+        currentThemeData.colorScheme.onSurface.withValues(alpha: 0.12);
+    splashColor =
+        currentThemeData.colorScheme.onSurface.withValues(alpha: 0.15);
   }
 
   void _updateMaterial2Colors(ThemeData currentThemeData) {
@@ -562,9 +579,9 @@ class SampleModel extends Listenable {
     switch (currentThemeData.brightness) {
       case Brightness.light:
         final Color primaryColor = Color.alphaBlend(
-            Colors.white.withOpacity(0.9),
+            Colors.white.withValues(alpha: 0.9),
             currentThemeData.colorScheme.primary);
-        backgroundColor = Color.alphaBlend(Colors.white.withOpacity(0.95),
+        backgroundColor = Color.alphaBlend(Colors.white.withValues(alpha: 0.95),
             currentThemeData.colorScheme.primary);
         homeCardColor = primaryColor;
         sampleOutputCardColor = const Color(0xFFFFFBFE);
@@ -574,7 +591,7 @@ class SampleModel extends Listenable {
         subSamplesTabBarColor = primaryColor;
         drawerTextIconColor = currentThemeData.colorScheme.onSurface;
         drawerBackgroundColor = const Color(0xFFFFFBFE);
-        footerColor = Color.alphaBlend(Colors.white.withOpacity(0.85),
+        footerColor = Color.alphaBlend(Colors.white.withValues(alpha: 0.85),
             currentThemeData.colorScheme.primary);
 
         // baseNavigationBarTextColor = currentThemeData.colorScheme.surface;
@@ -585,9 +602,9 @@ class SampleModel extends Listenable {
 
       case Brightness.dark:
         final Color primaryColor = Color.alphaBlend(
-            Colors.black.withOpacity(0.85),
+            Colors.black.withValues(alpha: 0.85),
             currentThemeData.colorScheme.primary);
-        backgroundColor = Color.alphaBlend(Colors.black.withOpacity(0.9),
+        backgroundColor = Color.alphaBlend(Colors.black.withValues(alpha: 0.9),
             currentThemeData.colorScheme.primary);
         homeCardColor = primaryColor;
         sampleOutputCardColor = const Color(0xFF1C1B1F);
@@ -597,7 +614,7 @@ class SampleModel extends Listenable {
         subSamplesTabBarColor = primaryColor;
         drawerTextIconColor = currentThemeData.colorScheme.onSurface;
         drawerBackgroundColor = const Color(0xFF1C1B1F);
-        footerColor = Color.alphaBlend(Colors.black.withOpacity(0.8),
+        footerColor = Color.alphaBlend(Colors.black.withValues(alpha: 0.8),
             currentThemeData.colorScheme.primary);
 
         // baseNavigationBarTextColor =

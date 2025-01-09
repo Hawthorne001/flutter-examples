@@ -50,7 +50,7 @@ class _RadialSliderCustomTextState extends SampleViewState {
                 value: _markerValue,
                 overlayRadius: 0,
                 borderColor: _borderColor,
-                overlayColor: _borderColor.withOpacity(0.125),
+                overlayColor: _borderColor.withValues(alpha: 0.125),
                 borderWidth: model.isWebFullView ? 10 : 7,
                 color: Colors.white,
                 onValueChanged: handlePointerValueChanged,
@@ -78,7 +78,6 @@ class _RadialSliderCustomTextState extends SampleViewState {
                     ),
                   ],
                 ),
-                positionFactor: 0.08,
               )
             ])
       ]),

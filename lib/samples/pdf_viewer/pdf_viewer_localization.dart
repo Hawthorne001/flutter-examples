@@ -1,6 +1,5 @@
 ///Package import
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// Core theme import
 // ignore: depend_on_referenced_packages
@@ -28,7 +27,6 @@ class _LocalizationPdfViewerState extends LocalizationSampleViewState {
   late Color _color;
   late bool _isLight;
   late Color _disabledColor;
-  final PdfViewerController _pdfViewerController = PdfViewerController();
   final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
   bool _isPdfLoaded = false;
   bool _isInitialBookmarkShown = false;
@@ -57,12 +55,12 @@ class _LocalizationPdfViewerState extends LocalizationSampleViewState {
             ? const Color.fromRGBO(73, 69, 79, 1)
             : const Color.fromRGBO(202, 196, 208, 1)
         : _isLight
-            ? Colors.black.withOpacity(0.54)
-            : Colors.white.withOpacity(0.65);
+            ? Colors.black.withValues(alpha: 0.54)
+            : Colors.white.withValues(alpha: 0.65);
     _disabledColor = _useMaterial3
         ? _isLight
-            ? const Color.fromRGBO(28, 27, 31, 1).withOpacity(0.38)
-            : const Color.fromRGBO(230, 225, 229, 1).withOpacity(0.38)
+            ? const Color.fromRGBO(28, 27, 31, 1).withValues(alpha: 0.38)
+            : const Color.fromRGBO(230, 225, 229, 1).withValues(alpha: 0.38)
         : _isLight
             ? Colors.black12
             : Colors.white12;
@@ -171,7 +169,6 @@ class _LocalizationPdfViewerState extends LocalizationSampleViewState {
                     child: SfPdfViewer.asset(
                       'assets/pdf/flutter_succinctly.pdf',
                       key: _pdfViewerKey,
-                      controller: _pdfViewerController,
                       canShowScrollHead: false,
                       onDocumentLoaded: (PdfDocumentLoadedDetails details) {
                         setState(() {
@@ -192,7 +189,7 @@ class _LocalizationPdfViewerState extends LocalizationSampleViewState {
 
   String getBookmarkLocaleString() {
     if (model.locale!.languageCode == 'ar') {
-      return 'المرجعية';
+      return 'إشارة مرجعية';
     } else if (model.locale!.languageCode == 'fr') {
       return 'Signet';
     } else if (model.locale!.languageCode == 'es') {

@@ -10,7 +10,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../model/sample_view.dart';
 
 import '../pdf/helper/save_file_mobile.dart'
-    if (dart.library.html) '../pdf/helper/save_file_web.dart';
+    if (dart.library.js_interop) '../pdf/helper/save_file_web.dart';
 
 /// Form filling.
 class FormFillingPdfViewer extends SampleView {
@@ -39,15 +39,23 @@ class _FormFillingPdfViewerState extends SampleViewState {
             ? const Color.fromRGBO(73, 69, 79, 1)
             : const Color.fromRGBO(202, 196, 208, 1)
         : Theme.of(context).brightness == Brightness.light
-            ? Colors.black.withOpacity(0.54)
-            : Colors.white.withOpacity(0.65);
+            ? Colors.black.withValues(alpha: 0.54)
+            : Colors.white.withValues(alpha: 0.65);
     _iconDisabledColor = _useMaterial3
         ? Theme.of(context).brightness == Brightness.light
-            ? const Color.fromRGBO(28, 27, 31, 1).withOpacity(0.38)
-            : const Color.fromRGBO(230, 225, 229, 1).withOpacity(0.38)
+            ? const Color.fromRGBO(28, 27, 31, 1).withValues(alpha: 0.38)
+            : const Color.fromRGBO(230, 225, 229, 1).withValues(alpha: 0.38)
         : Theme.of(context).brightness == Brightness.light
             ? Colors.black12
             : Colors.white12;
+  }
+
+  @override
+  void dispose() {
+    _undoHistoryController.dispose();
+    super.dispose();
+    _pdfViewerController.dispose();
+    _pdfViewerKey.currentState?.dispose();
   }
 
   @override
@@ -95,6 +103,7 @@ class _FormFillingPdfViewerState extends SampleViewState {
                           builder: (BuildContext context,
                               UndoHistoryValue value, Widget? child) {
                             return MaterialButton(
+                              padding: EdgeInsets.zero,
                               elevation: 0,
                               focusElevation: 0,
                               hoverElevation: 0,
@@ -152,6 +161,7 @@ class _FormFillingPdfViewerState extends SampleViewState {
                           builder: (BuildContext context,
                               UndoHistoryValue value, Widget? child) {
                             return MaterialButton(
+                              padding: EdgeInsets.zero,
                               onPressed: value.canRedo
                                   ? _undoHistoryController.redo
                                   : null,
@@ -209,6 +219,7 @@ class _FormFillingPdfViewerState extends SampleViewState {
                         height: _useMaterial3 ? 48 : null,
                         message: 'Save Document',
                         child: MaterialButton(
+                            padding: EdgeInsets.zero,
                             elevation: 0,
                             focusElevation: 0,
                             hoverElevation: 0,
@@ -374,25 +385,32 @@ class _FormFillingPdfViewerState extends SampleViewState {
       final Directory directory = await getApplicationSupportDirectory();
       final String path = directory.path;
       final File file = File('$path/$fileName');
-      await file.writeAsBytes(dataBytes);
-      _showDialog(message + path + r'\' + fileName);
+      try {
+        await file.writeAsBytes(dataBytes);
+        _showDialog('Document saved', message + path + r'\' + fileName);
+      } on PathAccessException catch (e) {
+        _showDialog(
+            'Error', e.osError?.message ?? 'Error in saving the document');
+      } catch (e) {
+        _showDialog('Error', 'Error in saving the document');
+      }
     }
   }
 
   /// Alert dialog for save and export
-  void _showDialog(String text) {
+  void _showDialog(String title, String message) {
     showDialog<Widget>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Document saved'),
+            title: Text(title),
             content: SizedBox(
               width: 328.0,
               child: Scrollbar(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(
                       parent: AlwaysScrollableScrollPhysics()),
-                  child: Text(text),
+                  child: Text(message),
                 ),
               ),
             ),
@@ -428,7 +446,7 @@ class _FormFillingPdfViewerState extends SampleViewState {
         endIndent: 12.0,
         // bottom indent of vertical divider
         color: model.themeData.colorScheme.brightness == Brightness.light
-            ? Colors.black.withOpacity(0.24)
+            ? Colors.black.withValues(alpha: 0.24)
             : const Color.fromRGBO(255, 255, 255, 0.26),
       ),
     );
