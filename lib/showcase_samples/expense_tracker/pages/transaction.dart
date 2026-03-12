@@ -9,7 +9,6 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../constants.dart';
 import '../custom_widgets/chip_and_drop_down_button.dart';
-import '../custom_widgets/custom_buttons.dart';
 import '../custom_widgets/custom_data_grid.dart';
 import '../custom_widgets/date_picker_drop_down_menu.dart';
 
@@ -111,7 +110,7 @@ class _TransactionPageState extends State<TransactionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               spacing: 8.0,
-              children: <Widget>[_buildFilter(), _buildExportButton()],
+              children: <Widget>[_buildFilter()],
             ),
           Expanded(child: _buildTransactionDataGrid(context)),
         ],
@@ -321,23 +320,23 @@ class _TransactionPageState extends State<TransactionPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   spacing: 8.0,
-                  children: <Widget>[_buildFilter(), _buildExportButton()],
+                  children: <Widget>[_buildFilter()],
                 ),
               ],
             ),
           );
   }
 
-  SizedBox _buildExportButton() {
-    return SizedBox(
-      height: 40.0,
-      child: ExportButton(
-        onTap: () async {
-          handleOnTapExportLogic(context, 'Transactions', 'Transaction');
-        },
-      ),
-    );
-  }
+  // SizedBox _buildExportButton() {
+  //   return SizedBox(
+  //     height: 40.0,
+  //     child: ExportButton(
+  //       onTap: () async {
+  //         handleOnTapExportLogic(context, 'Transactions', 'Transaction');
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildFilter() {
     return _buildTransactionFilter(context);

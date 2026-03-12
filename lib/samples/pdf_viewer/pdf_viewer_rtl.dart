@@ -512,9 +512,6 @@ class _RTLModePdfViewerState extends DirectionalitySampleViewState {
                   });
                 }
                 if (toolbarItem.toString() == 'Bookmarks') {
-                  setState(() {
-                    _canShowToolbar = false;
-                  });
                   _pdfViewerKey.currentState?.openBookmarkView();
                 } else if (toolbarItem.toString() == 'Search') {
                   setState(() {

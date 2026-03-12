@@ -435,26 +435,23 @@ class _FullViewSampleLayout extends StatelessWidget {
       alignment: Alignment.bottomLeft,
       child: Padding(
         padding: EdgeInsets.fromLTRB(30, needPadding ? 50 : 0, 0, 0),
-        child: SizedBox(
-          height: 20,
-          width: 230,
-          child: InkWell(
-            hoverColor: model.hoverColor,
-            highlightColor: model.splashColor,
-            splashColor: model.splashColor,
-            onTap: () => launchUrl(Uri.parse(sample!.sourceLink!)),
-            child: Row(
-              children: <Widget>[
-                Text(
-                  'Source: ',
-                  style: TextStyle(fontSize: 16, color: model.textColor),
-                ),
-                Text(
-                  sample!.sourceText!,
-                  style: const TextStyle(fontSize: 14, color: Colors.blue),
-                ),
-              ],
-            ),
+        child: InkWell(
+          hoverColor: model.hoverColor,
+          highlightColor: model.splashColor,
+          splashColor: model.splashColor,
+          onTap: () => launchUrl(Uri.parse(sample!.sourceLink!)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                'Source: ',
+                style: TextStyle(fontSize: 16, color: model.textColor),
+              ),
+              Text(
+                sample!.sourceText!,
+                style: const TextStyle(fontSize: 14, color: Colors.blue),
+              ),
+            ],
           ),
         ),
       ),

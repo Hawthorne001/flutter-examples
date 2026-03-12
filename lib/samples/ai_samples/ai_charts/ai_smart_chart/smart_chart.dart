@@ -290,6 +290,7 @@ class _SmartAIChartState extends SampleViewState {
   ) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
         side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         elevation: 0.0,
         alignment: Alignment.center,
@@ -309,11 +310,20 @@ class _SmartAIChartState extends SampleViewState {
             }
           : null,
       child: Row(
-        spacing: 10.0,
+        spacing: 8.0,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Icon(iconData, color: textColor, size: 20.0),
-          Text(alignText, style: TextStyle(color: textColor)),
+          Flexible(
+            child: Text(
+              alignText,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 12.0,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
         ],
       ),
     );

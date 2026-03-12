@@ -1,14 +1,7 @@
-/// Dart import.
 import 'dart:math';
-
-/// Package imports.
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-
-/// Calendar import.
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-
-/// Local imports.
 import '../../model/sample_view.dart';
 import 'appointment_editor.dart';
 import 'pop_up_editor.dart';
@@ -48,13 +41,49 @@ class _ShiftSchedulerState extends SampleViewState {
   Appointment? _selectedAppointment;
   late _ShiftDataSource _events;
 
+  // resource view properties
+  double _resourceViewWidth = 200;
+  double _resourceViewHeight = 100;
+
+  // new properties: size and visible resource count
+  double _resourceSize = 100;
+  int _visibleResourceCount = 3;
+
+  // enable flags for each property (controls whether the selected value is applied)
+  bool _enableWidth = true;
+  bool _enableHeight = true;
+  bool _enableSize = false;
+  bool _enableVisibleCount = false;
+
+  final List<double> _widthOptions = <double>[100, 150, 200, 250, 300, 500];
+  final List<double> _heightOptions = <double>[50, 100, 200, 300, 400, 500];
+
+  // options for the new properties
+  final List<double> _sizeOptions = <double>[50, 75, 100, 150, 200, 300];
+  final List<int> _visibleResourceCountOptions = <int>[
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    10,
+    12,
+    20,
+  ];
+
   @override
   void initState() {
     _calendarController.view = CalendarView.timelineWeek;
     _selectedAppointment = null;
-    _events = _ShiftDataSource(_shiftCollection, _employeeCollection);
+
     _addResourceDetails();
     _addResources();
+
+    // create data source after resources exist
+    _events = _ShiftDataSource(_shiftCollection, _employeeCollection);
+
     _addSpecialRegions();
     _addAppointmentDetails();
     _addAppointments();
@@ -68,8 +97,6 @@ class _ShiftSchedulerState extends SampleViewState {
   /// Navigates to appointment editor page when the Calendar elements tapped
   /// other than the header, handled the editor fields based on tapped element.
   void _onCalendarTapped(CalendarTapDetails calendarTapDetails) {
-    /// Condition added to open the editor, when the Calendar elements tapped
-    /// other than the header.
     if (calendarTapDetails.targetElement == CalendarElement.header ||
         calendarTapDetails.targetElement == CalendarElement.viewHeader ||
         calendarTapDetails.targetElement == CalendarElement.resourceHeader) {
@@ -77,149 +104,142 @@ class _ShiftSchedulerState extends SampleViewState {
     }
     _selectedAppointment = null;
 
-    /// Navigates Calendar to day view, when we tap on month cells in mobile.
     if (!model.isWebFullView &&
         _calendarController.view == CalendarView.month) {
       _calendarController.view = CalendarView.day;
-    } else {
-      if (calendarTapDetails.appointments != null &&
-          calendarTapDetails.targetElement == CalendarElement.appointment) {
-        final dynamic appointment = calendarTapDetails.appointments![0];
-        if (appointment is Appointment) {
-          _selectedAppointment = appointment;
-        }
+      return;
+    }
+
+    if (calendarTapDetails.appointments != null &&
+        calendarTapDetails.targetElement == CalendarElement.appointment) {
+      final dynamic appointment = calendarTapDetails.appointments![0];
+      if (appointment is Appointment) {
+        _selectedAppointment = appointment;
       }
+    }
 
-      final DateTime selectedDate = calendarTapDetails.date!;
-      final CalendarElement targetElement = calendarTapDetails.targetElement;
+    final DateTime selectedDate = calendarTapDetails.date!;
+    final CalendarElement targetElement = calendarTapDetails.targetElement;
 
-      /// To open the appointment editor for web,
-      /// when the screen width is greater than 767.
-      if (model.isWebFullView && !model.isMobileResolution) {
-        final bool isAppointmentTapped =
-            calendarTapDetails.targetElement == CalendarElement.appointment;
-        showDialog<Widget>(
-          context: context,
-          builder: (BuildContext context) {
-            final List<Appointment> appointment = <Appointment>[];
-            Appointment? newAppointment;
+    if (model.isWebFullView && !model.isMobileResolution) {
+      final bool isAppointmentTapped =
+          calendarTapDetails.targetElement == CalendarElement.appointment;
+      showDialog<Widget>(
+        context: context,
+        builder: (BuildContext context) {
+          final List<Appointment> appointment = <Appointment>[];
+          Appointment? newAppointment;
 
-            /// Creates a new appointment, which is displayed on the tapped
-            /// Calendar element, when the editor is opened.
-            if (_selectedAppointment == null) {
-              _isAllDay =
-                  calendarTapDetails.targetElement ==
-                  CalendarElement.allDayPanel;
-              _selectedColorIndex = 0;
-              _subject = '';
-              final DateTime date = calendarTapDetails.date!;
-              newAppointment = Appointment(
-                startTime: date,
-                endTime: date.add(const Duration(hours: 1)),
-                resourceIds: <Object>[calendarTapDetails.resource!.id],
-                color: _colorCollection[_selectedColorIndex],
-                isAllDay: _isAllDay,
-                subject: _subject == '' ? '(No title)' : _subject,
+          if (_selectedAppointment == null) {
+            _isAllDay =
+                calendarTapDetails.targetElement == CalendarElement.allDayPanel;
+            _selectedColorIndex = 0;
+            _subject = '';
+            final DateTime date = calendarTapDetails.date!;
+            newAppointment = Appointment(
+              startTime: date,
+              endTime: date.add(const Duration(hours: 1)),
+              resourceIds: <Object>[calendarTapDetails.resource!.id],
+              color: _colorCollection.isNotEmpty
+                  ? _colorCollection[_selectedColorIndex]
+                  : Colors.blue,
+              isAllDay: _isAllDay,
+              subject: _subject == '' ? '(No title)' : _subject,
+            );
+            appointment.add(newAppointment);
+            _events.appointments!.add(appointment[0]);
+            SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+              _events.notifyListeners(
+                CalendarDataSourceAction.add,
+                appointment,
               );
-              appointment.add(newAppointment);
-              _events.appointments!.add(appointment[0]);
-              SchedulerBinding.instance.addPostFrameCallback((
-                Duration duration,
-              ) {
-                _events.notifyListeners(
-                  CalendarDataSourceAction.add,
-                  appointment,
+            });
+            _selectedAppointment = newAppointment;
+          }
+
+          return PopScope(
+            onPopInvokedWithResult: (bool value, Object? result) async {
+              if (newAppointment != null) {
+                final int appointmentIndex = _events.appointments!.indexOf(
+                  newAppointment,
                 );
-              });
-              _selectedAppointment = newAppointment;
-            }
-            return PopScope(
-              onPopInvokedWithResult: (bool value, Object? result) async {
-                if (newAppointment != null) {
-                  /// To remove the created appointment when the pop-up closed
-                  /// without saving the appointment.
-                  final int appointmentIndex = _events.appointments!.indexOf(
-                    newAppointment,
+                if (appointmentIndex <= _events.appointments!.length - 1 &&
+                    appointmentIndex >= 0) {
+                  _events.appointments!.removeAt(
+                    _events.appointments!.indexOf(newAppointment),
                   );
-                  if (appointmentIndex <= _events.appointments!.length - 1 &&
-                      appointmentIndex >= 0) {
-                    _events.appointments!.removeAt(
-                      _events.appointments!.indexOf(newAppointment),
-                    );
-                    _events.notifyListeners(
-                      CalendarDataSourceAction.remove,
-                      <Appointment>[newAppointment],
-                    );
-                  }
+                  _events.notifyListeners(
+                    CalendarDataSourceAction.remove,
+                    <Appointment>[newAppointment],
+                  );
                 }
-              },
-              child: Center(
-                child: SizedBox(
-                  width: isAppointmentTapped ? 400 : 500,
-                  height: isAppointmentTapped
-                      ? (_selectedAppointment!.location == null ||
-                                _selectedAppointment!.location!.isEmpty
-                            ? 200
-                            : 250)
-                      : 450,
-                  child: Theme(
-                    data: model.themeData,
-                    child: Card(
-                      margin: EdgeInsets.zero,
-                      color: model.sampleOutputCardColor,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                      ),
-                      child: isAppointmentTapped
-                          ? displayAppointmentDetails(
-                              context,
-                              targetElement,
-                              selectedDate,
-                              model,
-                              _selectedAppointment!,
-                              _colorCollection,
-                              _colorNames,
-                              _events,
-                              _timeZoneCollection,
-                              _visibleDates,
-                            )
-                          : PopUpAppointmentEditor(
-                              model,
-                              newAppointment,
-                              appointment,
-                              _events,
-                              _colorCollection,
-                              _colorNames,
-                              _selectedAppointment!,
-                              _timeZoneCollection,
-                              _visibleDates,
-                            ),
+              }
+            },
+            child: Center(
+              child: SizedBox(
+                width: isAppointmentTapped ? 400 : 500,
+                height: isAppointmentTapped
+                    ? (_selectedAppointment!.location == null ||
+                              _selectedAppointment!.location!.isEmpty
+                          ? 200
+                          : 250)
+                    : 450,
+                child: Theme(
+                  data: model.themeData,
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    color: model.sampleOutputCardColor,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(4)),
                     ),
+                    child: isAppointmentTapped
+                        ? displayAppointmentDetails(
+                            context,
+                            targetElement,
+                            selectedDate,
+                            model,
+                            _selectedAppointment!,
+                            _colorCollection,
+                            _colorNames,
+                            _events,
+                            _timeZoneCollection,
+                            _visibleDates,
+                          )
+                        : PopUpAppointmentEditor(
+                            model,
+                            newAppointment,
+                            appointment,
+                            _events,
+                            _colorCollection,
+                            _colorNames,
+                            _selectedAppointment!,
+                            _timeZoneCollection,
+                            _visibleDates,
+                          ),
                   ),
                 ),
               ),
-            );
-          },
-        );
-      } else {
-        /// Navigates to the appointment editor page on mobile.
-        Navigator.push<Widget>(
-          context,
-          MaterialPageRoute<Widget>(
-            builder: (BuildContext context) => AppointmentEditor(
-              model,
-              _selectedAppointment,
-              targetElement,
-              selectedDate,
-              _colorCollection,
-              _colorNames,
-              _events,
-              _timeZoneCollection,
-              calendarTapDetails.resource,
             ),
+          );
+        },
+      );
+    } else {
+      Navigator.push<Widget>(
+        context,
+        MaterialPageRoute<Widget>(
+          builder: (BuildContext context) => AppointmentEditor(
+            model,
+            _selectedAppointment,
+            targetElement,
+            selectedDate,
+            _colorCollection,
+            _colorNames,
+            _events,
+            _timeZoneCollection,
+            calendarTapDetails.resource,
           ),
-        );
-      }
+        ),
+      );
     }
   }
 
@@ -238,7 +258,271 @@ class _ShiftSchedulerState extends SampleViewState {
     );
   }
 
-  /// Creates the required resource details as list.
+  @override
+  Widget buildSettings(BuildContext context) {
+    final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter stateSetter) {
+        Widget controlRow<T>({
+          required String label,
+          required bool enabled,
+          required ValueChanged<bool?> onEnableChanged,
+          required T value,
+          required List<T> options,
+          required ValueChanged<T?> onValueChanged,
+          required String Function(T) display,
+        }) {
+          final Color labelColor = enabled
+              ? model.textColor
+              : model.textColor.withValues(alpha: 0.5);
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+            children: <Widget>[
+              Checkbox(
+                value: enabled,
+                onChanged: (bool? v) {
+                  onEnableChanged(v);
+                  setState(() {});
+                  stateSetter(() {});
+                },
+              ),
+              const SizedBox(width: 8),
+              // Text (expandable)
+              Expanded(
+                child: Text(
+                  label,
+                  softWrap: true,
+                  maxLines: 2,
+                  textAlign: isRtl ? TextAlign.right : TextAlign.left,
+                  style: TextStyle(fontSize: 16.0, color: labelColor),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Dropdown
+              Container(
+                alignment: isRtl ? Alignment.centerRight : Alignment.centerLeft,
+                child: DropdownButton<T>(
+                  dropdownColor: model.drawerBackgroundColor,
+                  focusColor: Colors.transparent,
+                  underline: Container(
+                    color: const Color(0xFFBDBDBD),
+                    height: 1,
+                  ),
+                  value: value,
+                  items: options
+                      .map(
+                        (T v) => DropdownMenuItem<T>(
+                          value: v,
+                          child: Text(
+                            display(v),
+                            style: TextStyle(
+                              color: enabled
+                                  ? model.textColor
+                                  : model.textColor.withValues(alpha: 0.5),
+                            ),
+                            textAlign: isRtl ? TextAlign.right : TextAlign.left,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: enabled
+                      ? (T? v) {
+                          onValueChanged(v);
+                          setState(() {});
+                          stateSetter(() {});
+                        }
+                      : null,
+                ),
+              ),
+            ],
+          );
+        }
+
+        Widget sizeRow() {
+          final Color labelColor = _enableSize
+              ? model.textColor
+              : model.textColor.withValues(alpha: 0.5);
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+            children: <Widget>[
+              Checkbox(
+                value: _enableSize,
+                onChanged: (bool? v) {
+                  setState(() => _enableSize = v ?? false);
+                  stateSetter(() {});
+                },
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Size',
+                  softWrap: false,
+                  textAlign: isRtl ? TextAlign.right : TextAlign.left,
+                  style: TextStyle(fontSize: 16.0, color: labelColor),
+                ),
+              ),
+              const SizedBox(width: 12),
+              DropdownButton<double>(
+                dropdownColor: model.drawerBackgroundColor,
+                focusColor: Colors.transparent,
+                underline: Container(color: const Color(0xFFBDBDBD), height: 1),
+                value: _resourceSize,
+                items: _sizeOptions
+                    .map(
+                      (double v) => DropdownMenuItem<double>(
+                        value: v,
+                        child: Text(
+                          v.toInt().toString(),
+                          style: TextStyle(
+                            color: _enableSize
+                                ? model.textColor
+                                : model.textColor.withValues(alpha: 0.5),
+                          ),
+                          textAlign: isRtl ? TextAlign.right : TextAlign.left,
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _enableSize
+                    ? (double? v) {
+                        setState(() => _resourceSize = v ?? _resourceSize);
+                        stateSetter(() {});
+                      }
+                    : null,
+              ),
+            ],
+          );
+        }
+
+        return ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            // Panel width
+            controlRow<double>(
+              label: 'Panel width',
+              enabled: _enableWidth,
+              onEnableChanged: (bool? v) {
+                final bool val = v ?? false;
+                setState(() {
+                  _enableWidth = val;
+                  if (_enableWidth && _enableHeight) {
+                    _enableSize = false;
+                  }
+                });
+                stateSetter(() {});
+              },
+              value: _resourceViewWidth,
+              options: _widthOptions,
+              onValueChanged: (double? v) =>
+                  _resourceViewWidth = v ?? _resourceViewWidth,
+              display: (double v) => v.toInt().toString(),
+            ),
+            const SizedBox(height: 8),
+            // Resource height
+            controlRow<double>(
+              label: 'Resource height',
+              enabled: _enableHeight,
+              onEnableChanged: (bool? v) {
+                final bool val = v ?? false;
+                setState(() {
+                  _enableHeight = val;
+                  if (_enableWidth && _enableHeight) {
+                    _enableSize = false;
+                  }
+                });
+                stateSetter(() {});
+              },
+              value: _resourceViewHeight,
+              options: _heightOptions,
+              onValueChanged: (double? v) =>
+                  _resourceViewHeight = v ?? _resourceViewHeight,
+              display: (double v) => v.toInt().toString(),
+            ),
+            const SizedBox(height: 8),
+            // Size
+            sizeRow(),
+            const SizedBox(height: 8),
+            // Visible count (when enabled, enforce rules)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+              children: <Widget>[
+                Checkbox(
+                  value: _enableVisibleCount,
+                  onChanged: (bool? v) {
+                    final bool val = v ?? false;
+                    setState(() {
+                      _enableVisibleCount = val;
+                      if (val) {
+                        _enableWidth = true;
+                        _enableHeight = false;
+                        _enableSize = false;
+                      }
+                    });
+                    stateSetter(() {});
+                  },
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Visible count',
+                    softWrap: true,
+                    maxLines: 2,
+                    textAlign: isRtl ? TextAlign.right : TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: _enableVisibleCount
+                          ? model.textColor
+                          : model.textColor.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                DropdownButton<int>(
+                  dropdownColor: model.drawerBackgroundColor,
+                  focusColor: Colors.transparent,
+                  underline: Container(
+                    color: const Color(0xFFBDBDBD),
+                    height: 1,
+                  ),
+                  value: _visibleResourceCount,
+                  items: _visibleResourceCountOptions
+                      .map(
+                        (int v) => DropdownMenuItem<int>(
+                          value: v,
+                          child: Text(
+                            v.toString(),
+                            style: TextStyle(
+                              color: _enableVisibleCount
+                                  ? model.textColor
+                                  : model.textColor.withValues(alpha: 0.5),
+                            ),
+                            textAlign: isRtl ? TextAlign.right : TextAlign.left,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: _enableVisibleCount
+                      ? (int? v) {
+                          setState(
+                            () => _visibleResourceCount =
+                                v ?? _visibleResourceCount,
+                          );
+                          stateSetter(() {});
+                        }
+                      : null,
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _addResourceDetails() {
     _nameCollection.add('John');
     _nameCollection.add('Bryan');
@@ -422,11 +706,11 @@ class _ShiftSchedulerState extends SampleViewState {
       _employeeCollection.add(
         CalendarResource(
           displayName: _nameCollection[i],
-          id: '000' + i.toString(),
+          id: 'R${i.toString().padLeft(3, '0')}',
           color: Color.fromRGBO(
-            random.nextInt(255),
-            random.nextInt(255),
-            random.nextInt(255),
+            random.nextInt(256),
+            random.nextInt(256),
+            random.nextInt(256),
             1,
           ),
           image: i < _userImages.length
@@ -481,9 +765,10 @@ class _ShiftSchedulerState extends SampleViewState {
     final Random random = Random.secure();
     for (int i = 0; i < _employeeCollection.length; i++) {
       final List<Object> employeeIds = <Object>[_employeeCollection[i].id];
-      if (i == _employeeCollection.length - 1) {
-        int index = random.nextInt(5);
-        index = index == i ? index + 1 : index;
+      if (i == _employeeCollection.length - 1 &&
+          _employeeCollection.length > 1) {
+        int index = random.nextInt(_employeeCollection.length - 1);
+        index = index == i ? (index + 1) % _employeeCollection.length : index;
         final Object employeeId = _employeeCollection[index].id;
         if (employeeId is String) {
           employeeIds.add(employeeId);
@@ -509,8 +794,9 @@ class _ShiftSchedulerState extends SampleViewState {
             Appointment(
               startTime: shiftStartTime,
               endTime: shiftStartTime.add(const Duration(hours: 1)),
-              subject: _subjectCollection[random.nextInt(8)],
-              color: _colorCollection[random.nextInt(8)],
+              subject:
+                  _subjectCollection[random.nextInt(_subjectCollection.length)],
+              color: _colorCollection[random.nextInt(_colorCollection.length)],
               startTimeZone: '',
               endTimeZone: '',
               resourceIds: employeeIds,
@@ -560,6 +846,12 @@ class _ShiftSchedulerState extends SampleViewState {
       dataSource: calendarDataSource,
       onViewChanged: viewChangedCallback,
       onTap: calendarTapCallback,
+      resourceViewSettings: ResourceViewSettings(
+        width: _enableWidth ? _resourceViewWidth : null,
+        height: _enableHeight ? _resourceViewHeight : null,
+        size: _enableSize ? _resourceSize : 75,
+        visibleResourceCount: _enableVisibleCount ? _visibleResourceCount : -1,
+      ),
     );
   }
 }

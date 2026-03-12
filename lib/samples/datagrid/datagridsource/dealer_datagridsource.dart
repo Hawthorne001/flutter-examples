@@ -16,20 +16,6 @@ import '../model/dealer.dart';
 class DealerDataGridSource extends DataGridSource {
   /// Creates the dealer data source class with required details.
   DealerDataGridSource(this.sampleModel) {
-    _textStyle =
-        sampleModel.themeData.colorScheme.brightness == Brightness.light
-        ? const TextStyle(
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-            color: Colors.black87,
-          )
-        : const TextStyle(
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-            color: Color.fromRGBO(255, 255, 255, 1),
-          );
     _dealers = _obtainDealerDetails(100);
     _buildDataGridRows();
   }
@@ -43,9 +29,22 @@ class DealerDataGridSource extends DataGridSource {
   /// Collection of [DataGridRow].
   late List<DataGridRow> _dataGridRows;
 
-  /// Helps to change the [TextStyle] of editable widget.
-  /// Decide the text appearance of editable widget based on [Brightness].
-  late TextStyle _textStyle;
+  /// Helps to obtain the text style based on the sample browser theme.
+  TextStyle _getTextStyle() {
+    return sampleModel.themeData.colorScheme.brightness == Brightness.light
+        ? const TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Colors.black87,
+          )
+        : const TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Color.fromRGBO(255, 255, 255, 1),
+          );
+  }
 
   /// Help to generate the random number.
   final Random _random = Random.secure();
@@ -262,7 +261,7 @@ class DealerDataGridSource extends DataGridSource {
             borderSide: BorderSide(color: sampleModel.primaryColor),
           ),
         ),
-        style: _textStyle,
+        style: _getTextStyle(),
         cursorColor: sampleModel.primaryColor,
         inputFormatters: <TextInputFormatter>[
           FilteringTextInputFormatter.allow(regExp),
@@ -345,7 +344,7 @@ class DealerDataGridSource extends DataGridSource {
             child: Text(
               displayText,
               textAlign: TextAlign.right,
-              style: _textStyle,
+              style: _getTextStyle(),
             ),
           ),
         );
@@ -381,7 +380,7 @@ class DealerDataGridSource extends DataGridSource {
         underline: const SizedBox.shrink(),
         icon: const Icon(Icons.arrow_drop_down_sharp),
         isExpanded: true,
-        style: _textStyle,
+        style: _getTextStyle(),
         onChanged: (String? value) {
           _newCellValue = value;
 

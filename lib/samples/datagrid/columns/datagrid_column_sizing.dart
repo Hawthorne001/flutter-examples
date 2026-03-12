@@ -212,7 +212,7 @@ class _ColumnSizingDataGridState extends SampleViewState {
                 child: Row(
                   children: <Widget>[
                     SizedBox(
-                      width: _isWebOrDesktop ? 100 : 150,
+                      width: _isWebOrDesktop ? 90 : 150,
                       child: Text(
                         'Column width mode',
                         softWrap: true,

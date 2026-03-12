@@ -58,19 +58,18 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildTitle('About', widget.primaryColor),
-                  const SizedBox(height: 10),
                   _buildAboutText(),
                   _buildApiKeyTextField(stateSetter),
-                  const SizedBox(height: 10),
                   _buildRichText(
                     text:
                         '\nIf you prefer to explore this sample without an API key, you may close this pop-up. You can still access samples featuring AI responses that are stored locally',
                     linkText: '',
                     url: '',
-                    trailingText: '.\n',
+                    trailingText: '.',
                   ),
+                  const SizedBox(height: 8),
                   _buildTitle('Disclaimer', widget.primaryColor),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
                   const Text(
                     'The API key you provide is not stored in Syncfusion; instead, it is sent to Google to obtain a response for your request. Both the API key and the request and response messages are deleted once your session ends.',
                     style: TextStyle(fontSize: 14),

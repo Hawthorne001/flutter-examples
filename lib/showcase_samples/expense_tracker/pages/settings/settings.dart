@@ -7,8 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants.dart';
-import '../../custom_widgets/custom_buttons.dart';
-import '../../helper/common_helper.dart';
 import '../../helper/dashboard.dart';
 import '../../helper/responsive_layout.dart';
 import '../../models/transactional_data.dart';
@@ -463,11 +461,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: Row(
                       spacing: 16.0,
                       children: <Widget>[
-                        ExportButton(
-                          onTap: () {
-                            handleOnTapExportLogic(context);
-                          },
-                        ),
+                        // ExportButton(
+                        //   onTap: () {
+                        //     handleOnTapExportLogic(context);
+                        //   },
+                        // ),
                         _buildResetButton(context),
                       ],
                     ),
