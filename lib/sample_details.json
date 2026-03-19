@@ -149,7 +149,7 @@
             "platformsToHide": [
               "web",
               "windows",
-              "macos",
+              "macOS",
               "linux"
             ]
           },
@@ -162,7 +162,7 @@
             "platformsToHide": [
               "web",
               "windows",
-              "macos",
+              "macOS",
               "linux"
             ]
           }
@@ -3254,7 +3254,8 @@
             "type": "sample",
             "title": "Resource View",
             "key": "shift_scheduler",
-            "codeLink": "https://github.com/syncfusion/flutter-examples/tree/master/lib/samples/calendar/shift_scheduler.dart"
+            "codeLink": "https://github.com/syncfusion/flutter-examples/tree/master/lib/samples/calendar/shift_scheduler.dart",
+            "needsPropertyPanel": true
           },
           {
             "type": "sample",

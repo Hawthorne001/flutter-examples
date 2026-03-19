@@ -110,12 +110,8 @@ class _LineZoneState extends SampleViewState {
         ? 80
         : orientation == Orientation.portrait
         ? 80
-        : 60;
-    final double containerHeight = kIsWeb
-        ? 60
-        : orientation == Orientation.portrait
-        ? 60
-        : 42;
+        : 72;
+    const double containerHeight = 60;
     final double fontSize = 14 / MediaQuery.of(context).textScaler.scale(1);
     final double size = 13 / MediaQuery.of(context).textScaler.scale(1);
     return SfCartesianChart(

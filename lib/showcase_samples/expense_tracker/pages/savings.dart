@@ -9,7 +9,6 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../constants.dart';
 import '../custom_widgets/chip_and_drop_down_button.dart';
-import '../custom_widgets/custom_buttons.dart';
 import '../custom_widgets/custom_data_grid.dart';
 import '../custom_widgets/date_picker_drop_down_menu.dart';
 import '../data_processing/saving_handler.dart'
@@ -405,7 +404,7 @@ class _SavingsPageState extends State<SavingsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             spacing: 8.0,
-            children: <Widget>[_buildFilter(), _buildExportButton(context)],
+            children: <Widget>[_buildFilter()],
           ),
         ],
       ),
@@ -422,16 +421,16 @@ class _SavingsPageState extends State<SavingsPage> {
     );
   }
 
-  Widget _buildExportButton(BuildContext context) {
-    return SizedBox(
-      height: 40.0,
-      child: ExportButton(
-        onTap: () async {
-          handleOnTapExportLogic(context, 'Savings', 'Saving');
-        },
-      ),
-    );
-  }
+  // Widget _buildExportButton(BuildContext context) {
+  //   return SizedBox(
+  //     height: 40.0,
+  //     child: ExportButton(
+  //       onTap: () async {
+  //         handleOnTapExportLogic(context, 'Savings', 'Saving');
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildFilter() {
     return _buildSavingsFilter(context);
@@ -685,7 +684,7 @@ class _SavingsPageState extends State<SavingsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8.0,
-            children: <Widget>[_buildFilter(), _buildExportButton(context)],
+            children: <Widget>[_buildFilter()],
           ),
         Expanded(
           child: Consumer<ViewNotifier>(
